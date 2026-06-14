@@ -1,0 +1,36 @@
+{
+  "theme": "broadcast",
+  "lanes": [
+    {
+      "id": "main",
+      "position": "bottom",
+      "height": 52,
+      "speed": 80,
+      "font": "Inter, Arial, sans-serif",
+      "fontSize": 18,
+      "separator": "◆",
+      "itemPadding": 48,
+      "overrides": {},
+      "items": [
+        {
+          "type": "text",
+          "content": "Testing the API layer!"
+        },
+        {
+          "type": "breaking",
+          "label": "LIVE",
+          "content": "Stream is on — via API update"
+        },
+        {
+          "type": "text",
+          "content": "PowerShell just updated this ticker live!"
+        },
+        {
+          "type": "breaking",
+          "label": "ALERT",
+          "content": "Demo script is running"
+        }
+      ]
+    }
+  ]
+}
