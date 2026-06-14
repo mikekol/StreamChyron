@@ -11,6 +11,11 @@ export interface BreakingItem {
 
 export type ChyronItem = TextItem | BreakingItem
 
+export interface LogoConfig {
+  src: string
+  width?: number
+}
+
 export interface LaneConfig {
   id: string
   position: 'top' | 'bottom'
@@ -21,6 +26,7 @@ export interface LaneConfig {
   separator: string
   itemPadding: number
   overrides: Record<string, string>
+  logo?: LogoConfig
   items: ChyronItem[]
 }
 
