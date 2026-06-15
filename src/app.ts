@@ -1,24 +1,26 @@
-import type { ChyronConfig } from './types'
+import type { AppState, ChyronConfig, ChyronItem, StopAlert } from './types'
 import { Lane } from './lane'
 import { THEMES } from './themes'
-import { loadConfig, watchConfig } from './config'
+import { loadState, watchState } from './config'
 
 export class ChyronApp {
   private lanes = new Map<string, Lane>()
   private stopWatcher: (() => void) | null = null
+  private activeStop: StopAlert | null = null
 
   constructor(private root: HTMLElement) {}
 
   async start(): Promise<void> {
-    const config = await loadConfig()
-    this.init(config)
-    this.stopWatcher = watchConfig(config, newConfig => this.onConfigChange(newConfig))
+    const state = await loadState()
+    this.init(state)
+    this.stopWatcher = watchState(state, s => this.onStateChange(s))
   }
 
-  init(config: ChyronConfig): void {
-    this.applyTheme(config)
-    config.lanes.forEach(laneConfig => {
-      const lane = new Lane(laneConfig)
+  init(state: AppState): void {
+    this.applyTheme(state.config)
+    state.config.lanes.forEach(laneConfig => {
+      const merged = this.mergeTransient(laneConfig, state.transientItems)
+      const lane = new Lane(merged)
       lane.mount(this.root)
       this.lanes.set(laneConfig.id, lane)
     })
@@ -33,10 +35,14 @@ export class ChyronApp {
     })
   }
 
-  onConfigChange(newConfig: ChyronConfig): void {
-    this.applyTheme(newConfig)
+  onStateChange(state: AppState): void {
+    this.applyTheme(state.config)
+    this.updateLanes(state)
+    this.updateStop(state.stop)
+  }
 
-    const newIds = new Set(newConfig.lanes.map(l => l.id))
+  private updateLanes(state: AppState): void {
+    const newIds = new Set(state.config.lanes.map(l => l.id))
 
     this.lanes.forEach((lane, id) => {
       if (!newIds.has(id)) {
@@ -45,15 +51,38 @@ export class ChyronApp {
       }
     })
 
-    newConfig.lanes.forEach(laneConfig => {
+    state.config.lanes.forEach(laneConfig => {
+      const merged = this.mergeTransient(laneConfig, state.transientItems)
       if (this.lanes.has(laneConfig.id)) {
-        this.lanes.get(laneConfig.id)!.update(laneConfig)
+        this.lanes.get(laneConfig.id)!.update(merged)
       } else {
-        const lane = new Lane(laneConfig)
+        const lane = new Lane(merged)
         lane.mount(this.root)
         this.lanes.set(laneConfig.id, lane)
       }
     })
+  }
+
+  private updateStop(stop: StopAlert | null): void {
+    const wasActive = this.activeStop !== null
+    const isActive = stop !== null
+
+    if (isActive && !wasActive) {
+      this.lanes.forEach(lane => lane.showStop(stop))
+    } else if (!isActive && wasActive) {
+      this.lanes.forEach(lane => lane.clearStop())
+    }
+
+    this.activeStop = stop
+  }
+
+  private mergeTransient(
+    laneConfig: AppState['config']['lanes'][number],
+    transientItems: Record<string, ChyronItem[]>
+  ): typeof laneConfig {
+    const extra = transientItems[laneConfig.id] ?? []
+    if (extra.length === 0) return laneConfig
+    return { ...laneConfig, items: [...laneConfig.items, ...extra] }
   }
 
   stop(): void {

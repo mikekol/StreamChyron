@@ -67,6 +67,63 @@
   display: block;
 }
 
+/* STOP alert overlay — z-index 9 keeps it below the logo (z-index 10) */
+@keyframes stop-wipe-in {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0%   0 0); }
+}
+@keyframes stop-wipe-out {
+  from { clip-path: inset(0 0%   0 0); }
+  to   { clip-path: inset(0 0% 0 100%); }
+}
+@keyframes stop-label-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+.stop-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 20px;
+  background: #aa0000;
+  color: #fff;
+  clip-path: inset(0 100% 0 0);
+  pointer-events: none;
+}
+
+.stop-overlay--active {
+  animation: stop-wipe-in 0.35s ease-out forwards;
+}
+
+.stop-overlay--exiting {
+  animation: stop-wipe-out 0.35s ease-in forwards;
+}
+
+.stop-label {
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.75em;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  animation: stop-label-pulse 1s ease-in-out infinite;
+}
+
+.stop-content {
+  flex: 1;
+  font-weight: 700;
+  font-size: 1.1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .item-text {
   display: inline-block;
 }

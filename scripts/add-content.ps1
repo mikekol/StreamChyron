@@ -57,6 +57,19 @@ function Clear-Lane($laneId) {
     $result
 }
 
+function Send-StopAlert {
+    param(
+        [string]$LaneId = "main",
+        [string]$Content,
+        [string]$Label = "STOP",
+        [int]$Duration = 7
+    )
+    $body = @{ laneId = $LaneId; label = $Label; content = $Content; duration = $Duration } | ConvertTo-Json
+    $result = Invoke-RestMethod -Uri "$Server/stop" -Method Post -ContentType "application/json" -Body $body
+    Write-Host "STOP alert sent: [$Label] $Content ($Duration s)" -ForegroundColor Red
+    $result
+}
+
 function Show-Config {
     $config = Get-Config
     Write-Host "`nCurrent config:" -ForegroundColor White

@@ -1,11 +1,13 @@
-import type { LaneConfig, LogoConfig } from './types'
+import type { LaneConfig, LogoConfig, StopAlert } from './types'
 import { Ticker } from './ticker'
+import { StopOverlay } from './stop-overlay'
 
 export class Lane {
   private el: HTMLElement
   private tickerWrapper: HTMLElement
   private logoEl: HTMLElement
   private ticker: Ticker
+  private stopOverlay: StopOverlay
   private config: LaneConfig
 
   constructor(config: LaneConfig) {
@@ -23,6 +25,9 @@ export class Lane {
 
     this.ticker = new Ticker(this.tickerWrapper)
     this.ticker.render(config.items, config)
+
+    // Stop overlay at z-index 9 — below logo (z-index 10)
+    this.stopOverlay = new StopOverlay(this.el)
 
     this.logoEl = document.createElement('div')
     this.logoEl.className = 'lane-logo'
@@ -68,8 +73,17 @@ export class Lane {
     this.updateLogo(config.logo)
   }
 
+  showStop(stop: StopAlert): void {
+    this.stopOverlay.show(stop.label, stop.content)
+  }
+
+  clearStop(): void {
+    this.stopOverlay.hide()
+  }
+
   destroy(): void {
     this.ticker.destroy()
+    this.stopOverlay.destroy()
     this.el.remove()
   }
 

@@ -45,3 +45,16 @@ export interface ChyronConfig {
   themes?: Record<string, Partial<ThemeVars>>
   lanes: LaneConfig[]
 }
+
+export interface StopAlert {
+  laneId: string
+  label: string
+  content: string
+  endsAt: number
+}
+
+export interface AppState {
+  config: ChyronConfig
+  transientItems: Record<string, ChyronItem[]>
+  stop: StopAlert | null
+}
